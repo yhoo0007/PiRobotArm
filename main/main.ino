@@ -148,6 +148,10 @@ void serveSerial() {
                 SERIAL_COM.println("0\r\n");
             }
             break;
+        case COMMAND_RESTART:
+            DPRINTLN("Restarting");
+            ESP.restart();
+            break;
         default:
             DPRINTLN("Unknown command!");
             break;

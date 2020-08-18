@@ -11,6 +11,7 @@
 #define COMMAND_START_MOTOR 4
 #define COMMAND_START_ALL 5
 #define COMMAND_STATUS 6
+#define COMMAND_RESTART 7
 
 
 struct Command

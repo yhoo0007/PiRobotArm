@@ -166,6 +166,12 @@ class RobotArm:
         except ValueError as e:
             raise IKError(f'IK Error {str(e)}')
 
+    def restart(self):
+        for port in self.serial_ports:
+            port.write(b'R\n')
+        sleep(0.5)
+        self.getstatus()
+
 
 # PORT1 = '/dev/ttyUSB1'
 # PORT1 = 'COM3'
@@ -286,6 +292,9 @@ if __name__ == "__main__":
                     print('Invalid arguments provided')
         elif command == 'current':
             print(f'Current positions:\nx:\t{robot_arm.x}\ny:\t{robot_arm.y}\nz:\t{robot_arm.z}')
+        elif command == 'restart':
+            print('Restarting robot arm')
+            robot_arm.restart()
         elif command == 'readall':
             print('Serial 1:', ser1.read_until('\r\n\r\n').decode())
             print('Serial 2:', ser2.read_until('\r\n\r\n').decode())

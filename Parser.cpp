@@ -32,5 +32,7 @@ void Parser::parse(String string, Command *command) {
         }
     } else if (chr == "?") {
         command->type = COMMAND_STATUS;
+    } else if (chr == "R") {
+        command->type = COMMAND_RESTART
     }
 }
