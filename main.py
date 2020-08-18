@@ -1,6 +1,7 @@
 import serial
 import math
 import sys
+from traceback import format_exc
 from time import sleep
 
 
@@ -64,6 +65,8 @@ class RobotArm:
     ARM_A = 320
     ARM_B = 270
     Z_CENTER_TO_ORIGIN = 50
+    ARM_A2 = ARM_A * ARM_A
+    ARM_B2 = ARM_B * ARM_B
 
     BASE_MIN_ANGLE = -45
     BASE_MAX_ANGLE = 225
@@ -145,15 +148,13 @@ class RobotArm:
             r1 = math.sqrt(x * x + y * y)
             r2 = z - RobotArm.Z_CENTER_TO_ORIGIN
             r3 = math.sqrt(r1 * r1 + r2 * r2)
-            ARM_A2 = RobotArm.ARM_A * RobotArm.ARM_A
-            ARM_B2 = RobotArm.ARM_B * RobotArm.ARM_B
             arm_a_angle = math.degrees(
-                math.acos((ARM_B2 - ARM_A2 - r3 * r3) / (-2 * RobotArm.ARM_A * r3) + \
+                math.acos((RobotArm.ARM_B2 - RobotArm.ARM_A2 - r3 * r3) / (-2 * RobotArm.ARM_A * r3) + \
                 math.atan(r2 / r1))
             )
 
             arm_b_angle = math.degrees(
-                math.acos((r3 * r3 - ARM_A2 - ARM_B2) / (-2 * RobotArm.ARM_A * RobotArm.ARM_B))
+                math.acos((r3 * r3 - RobotArm.ARM_A2 - RobotArm.ARM_B2) / (-2 * RobotArm.ARM_A * RobotArm.ARM_B))
             )
 
             picker_angle = 270 - arm_b_angle - arm_a_angle
@@ -161,10 +162,10 @@ class RobotArm:
             if (base_angle < RobotArm.BASE_MIN_ANGLE or base_angle > RobotArm.BASE_MAX_ANGLE or\
                 arm_a_angle < RobotArm.ARM_A_MIN_ANGLE or arm_a_angle > RobotArm.ARM_A_MAX_ANGLE or\
                 arm_b_angle < RobotArm.ARM_B_MIN_ANGLE or arm_b_angle > RobotArm.ARM_B_MAX_ANGLE):
-                    raise IKError('resultant angle out of range')
+                    raise IKError(f'Calculated angles\nbase:\t{base_angle}\narm a:\t{arm_a_angle}\narm b:\t{arm_b_angle}\npicker:\t{picker_angle}\nresultant angle out of range')
             return base_angle, arm_a_angle, arm_b_angle, picker_angle
         except ValueError as e:
-            raise IKError(f'IK Error {str(e)}')
+            raise IKError(f'IK Error {format_exc()}')
 
     def restart(self):
         for port in self.serial_ports:
@@ -297,7 +298,8 @@ if __name__ == "__main__":
             except ValueError:
                 print('Invalid argument provided')
         elif command == 'current':
-            print(f'Current positions:\nx:\t{robot_arm.x}\ny:\t{robot_arm.y}\nz:\t{robot_arm.z}')
+            print(f'Current coordinates:\nx:\t{robot_arm.x}\ny:\t{robot_arm.y}\nz:\t{robot_arm.z}')
+            print(f'Current angles:\nbase:\t{robot_arm.base_motor.angle}\narm a:\t{robot_arm.arm_a_motor.angle}\narm b:\t{robot_arm.arm_b_motor.angle}')
         elif command == 'restart':
             print('Restarting robot arm')
             robot_arm.restart()
