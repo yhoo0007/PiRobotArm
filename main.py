@@ -63,7 +63,6 @@ def readDecode(ser):
 class RobotArm:
     ARM_A = 320
     ARM_B = 270
-
     Z_CENTER_TO_ORIGIN = 50
 
     BASE_MIN_ANGLE = -45
@@ -87,9 +86,9 @@ class RobotArm:
 
         self.serial_ports = list(set([c['serial_port'] for c in configs]))
 
-        self.x = None  # TODO:: forward kinematic calculate coordinate from angles
-        self.y = None
-        self.z = None
+        self.x = 0  # TODO:: forward kinematic calculate coordinate from angles
+        self.y = 226
+        self.z = 35
     
     def getstatus(self):
         base_motor_status = self.base_motor.getstatus()
