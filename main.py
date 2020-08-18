@@ -190,7 +190,7 @@ def getcommand():
 
 
 if __name__ == "__main__":
-    port1, port2 = sys.argv[1], sys.arg[2]
+    port1, port2 = sys.argv[1], sys.argv[2]
     print('Opening serial port')
     ser1 = serial.Serial(port1, BAUD1, timeout=TIMEOUT1)
     ser1.reset_output_buffer()
