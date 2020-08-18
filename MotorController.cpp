@@ -51,7 +51,7 @@ void MotorController::timerEnable() {
  * Enables the motor on the given channel.
  */
 int MotorController::enable(int channel) {
-    if (channel < 0 || channel >= numMotors) {
+    if (channel < 0 || channel >= numMotors || motors[channel].enaPin == PIN_UNDEFINED) {
         DPRINTLN("MC: Invalid channel number provided");
         return 1;
     }
@@ -63,7 +63,7 @@ int MotorController::enable(int channel) {
  * Disables the motor on the given channel.
  */
 int MotorController::disable(int channel) {
-    if (channel < 0 || channel >= numMotors) {
+    if (channel < 0 || channel >= numMotors || motors[channel].enaPin == PIN_UNDEFINED) {
         DPRINTLN("MC: Invalid channel number provided");
         return 1;
     }
