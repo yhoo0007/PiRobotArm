@@ -13,8 +13,12 @@ extern MotorController motorController;
 void Motor::init(struct MotorConfig config) {
     stepPin = config.stepPin;
     dirPin = config.dirPin;
+    enaPin = config.enaPin;
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
+    if (enaPin != PIN_UNDEFINED) {
+        pinMode(enaPin, OUTPUT);
+    }
     
     freqs = (uint16_t*)malloc(sizeof(uint16_t) * 1);
     freqs[0] = 0;
