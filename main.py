@@ -155,13 +155,15 @@ class RobotArm:
             else:
                 base_angle = math.atan(y / x)
                 base_angle = math.degrees(base_angle)
+                if x < 0:
+                    base_angle += 180
             
             r1 = math.sqrt(x * x + y * y)
             r2 = z - RobotArm.Z_CENTER_TO_ORIGIN
             r3 = math.sqrt(r1 * r1 + r2 * r2)
             arm_a_angle = math.degrees(
-                math.acos((RobotArm.ARM_B2 - RobotArm.ARM_A2 - r3 * r3) / (-2 * RobotArm.ARM_A * r3) + \
-                math.atan(r2 / r1))
+                math.acos((RobotArm.ARM_B2 - RobotArm.ARM_A2 - r3 * r3) / (-2 * RobotArm.ARM_A * r3)) + \
+                math.atan(r2 / r1)
             )
 
             arm_b_angle = math.degrees(
