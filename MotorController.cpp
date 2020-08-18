@@ -190,7 +190,7 @@ void IRAM_ATTR motorIsr1() {
 
 void IRAM_ATTR motorIsr2() {
     portENTER_CRITICAL_ISR(&motorController.motors[2].timerMux);
-    if (motorController.motors[2].counter < motorController.motors[0].target) {
+    if (motorController.motors[2].counter < motorController.motors[2].target) {
         bool state = digitalRead(motorController.motors[2].stepPin);
         digitalWrite(motorController.motors[2].stepPin, !state);
         if (state) motorController.motors[2].counter++;
