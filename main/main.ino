@@ -57,6 +57,7 @@ void setup() {
     // Picker motor config
     configs[0].stepPin = 16;
     configs[0].dirPin = 17;
+    configs[0].enaPin = 4;
     configs[0].timer = timerBegin(0, 80, true);
     configs[0].isr = &motorIsr0;
     #endif
