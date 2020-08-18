@@ -33,9 +33,9 @@ class Motor {
     hw_timer_t *timer = NULL;  // hardware timer of the motor
     portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
-    int stepPin;
-    int dirPin;
-    int enaPin;
+    int stepPin = PIN_UNDEFINED;
+    int dirPin = PIN_UNDEFINED;
+    int enaPin = PIN_UNDEFINED;
 };
 
 struct MotorConfig {
