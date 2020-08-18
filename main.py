@@ -1,5 +1,6 @@
 import serial
 import math
+import sys
 from time import sleep
 
 
@@ -167,13 +168,13 @@ class RobotArm:
             raise IKError(f'IK Error {str(e)}')
 
 
-# PORT1 = '/dev/ttyUSB0'
-PORT1 = 'COM3'
+# PORT1 = '/dev/ttyUSB1'
+# PORT1 = 'COM3'
 BAUD1 = 115200
 TIMEOUT1 = 5
 
 # PORT2 = '/dev/ttyUSB0'
-PORT2 = 'COM4'
+# PORT2 = 'COM4'
 BAUD2 = 115200
 TIMEOUT2 = 5
 
@@ -189,12 +190,13 @@ def getcommand():
 
 
 if __name__ == "__main__":
+    port1, port2 = sys.argv[1], sys.arg[2]
     print('Opening serial port')
-    ser1 = serial.Serial(PORT1, BAUD1, timeout=TIMEOUT1)
+    ser1 = serial.Serial(port1, BAUD1, timeout=TIMEOUT1)
     ser1.reset_output_buffer()
     ser1.reset_input_buffer()
 
-    ser2 = serial.Serial(PORT2, BAUD2, timeout=TIMEOUT2)
+    ser2 = serial.Serial(port2, BAUD2, timeout=TIMEOUT2)
     ser2.reset_output_buffer()
     ser2.reset_input_buffer()
     robot_arm = RobotArm(
