@@ -45,6 +45,14 @@ class Motor:
         print(repr(time_str))
         self.serial_port.write(time_str.encode())
         self.awaitdone()
+    
+    def enable(self):
+        self.serial_port.write(f'E{self.channel}'.encode())
+        return self.getresponse()
+    
+    def disable(self):
+        self.serial_port.write(f'D{self.channel}'.encode())
+        return self.getresponse()
 
     def awaitdone(self):
         # return self.serial_port.read_until(terminator=b'0\r\n\r\n')
@@ -137,7 +145,6 @@ class RobotArm:
         if wait:
             for port in self.serial_ports:
                 print(port.read_until(terminator=b'0\r\n\r\n'))
-
     
     def coordtoangle(self, x, y, z):
         try:
@@ -301,6 +308,40 @@ if __name__ == "__main__":
                 robot_arm.__setattr__(command, val)
             except ValueError:
                 print('Invalid argument provided')
+        elif command == 'enable':
+            motor_id = args.casefold()
+            print('Enabling motor', motor_id)
+            if motor_id == 'base':
+                if robot_arm.base_motor.enable() != 0:
+                    print('Error enabling motor')
+            elif motor_id == 'a':
+                if robot_arm.arm_a_motor.enable() != 0:
+                    print('Error enabling motor')
+            elif motor_id == 'b':
+                if robot_arm.arm_b_motor.enable() != 0:
+                    print('Error enabling motor')
+            elif motor_id == 'picker':
+                if robot_arm.picker_motor.enable() != 0:
+                    print('Error enabling motor')
+            else:
+                print('Invalid motor id')
+        elif command == 'disable':
+            motor_id = args.casefold()
+            print('Disabling motor', motor_id)
+            if motor_id == 'base':
+                if robot_arm.base_motor.disable() != 0:
+                    print('Error disabling motor')
+            elif motor_id == 'a':
+                if robot_arm.arm_a_motor.disable() != 0:
+                    print('Error disabling motor')
+            elif motor_id == 'b':
+                if robot_arm.arm_b_motor.disable() != 0:
+                    print('Error disabling motor')
+            elif motor_id == 'picker':
+                if robot_arm.picker_motor.disable() != 0:
+                    print('Error disabling motor')
+            else:
+                print('Invalid motor id')
         elif command == 'current':
             print(f'Current coordinates:\nx:\t{robot_arm.x}\ny:\t{robot_arm.y}\nz:\t{robot_arm.z}')
             print(f'Current angles:\nbase:\t{robot_arm.base_motor.angle}\narm a:\t{robot_arm.arm_a_motor.angle}\narm b:\t{robot_arm.arm_b_motor.angle}')
