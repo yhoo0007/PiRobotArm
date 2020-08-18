@@ -87,8 +87,8 @@ class RobotArm:
         self.serial_ports = list(set([c['serial_port'] for c in configs]))
 
         self.x = 0  # TODO:: forward kinematic calculate coordinate from angles
-        self.y = 226
-        self.z = 35
+        self.y = 450
+        self.z = 50
     
     def getstatus(self):
         base_motor_status = self.base_motor.getstatus()
