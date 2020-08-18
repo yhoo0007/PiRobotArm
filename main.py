@@ -47,7 +47,11 @@ class Motor:
         self.awaitdone()
 
     def awaitdone(self):
-        return self.serial_port.read_until(terminator=b'0\r\n\r\n')
+        # return self.serial_port.read_until(terminator=b'0\r\n\r\n')
+        self.getresponse()
+    
+    def getresponse(self):
+        return int(readDecode(self.serial_port).strip()[-1])
 
     def getstatus(self):
         self.serial_port.reset_input_buffer()
