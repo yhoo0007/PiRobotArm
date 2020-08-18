@@ -290,6 +290,12 @@ if __name__ == "__main__":
                         print(e)
                 except ValueError:
                     print('Invalid arguments provided')
+        elif command in ('x', 'y', 'z'):
+            try:
+                val = int(args[0])
+                robot_arm.__setattr__(command, val)
+            except ValueError:
+                print('Invalid argument provided')
         elif command == 'current':
             print(f'Current positions:\nx:\t{robot_arm.x}\ny:\t{robot_arm.y}\nz:\t{robot_arm.z}')
         elif command == 'restart':
