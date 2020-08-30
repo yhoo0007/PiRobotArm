@@ -20,6 +20,8 @@
 #define COM_RX 14
 #define COM_TX 27
 #define SERIAL_COM Serial
+#define sendDoneSignal() SERIAL_COM.println("0\r\n\r\n")
+#define sendErrorSignal() SERIAL_COM.println("1\r\n\r\n")
 Parser commandParser;
 
 #define FOR_PICKER
@@ -81,92 +83,73 @@ void serveSerial() {
         String recv = readSerial();
         Command command;
         DPRINT(recv);
-        commandParser.parse(recv, &command);
-        switch (command.type) {
-        case COMMAND_INVALID:
-            DPRINTLN("Invalid command received!");
-            SERIAL_COM.println("1\r\n");
-            break;
-        case COMMAND_ENABLE_MOTOR:
+        int validity = commandParser.parse(recv, &command);
+        bool error = false;
+        if (validity != 0) {
+            error = true;
+        } else if (command.type == ENABLE_SYMBOL) {
             DPRINTLN("Enabling channel: " + String(command.channel));
             if (motorController.enable(command.channel) != 0) {
                 DPRINTLN("Error enabling channel");
-                SERIAL_COM.println("1\r\n");
-            } else {
-                DPRINTLN("Channel " + String(command.channel) + " enabled");
-                SERIAL_COM.println("0\r\n");
+                error = true;
             }
-            break;
-        case COMMAND_DISABLE_MOTOR:
+        } else if (command.type == DISABLE_SYMBOL) {
             DPRINTLN("Disabling channel: " + String(command.channel));
             if (motorController.disable(command.channel) != 0) {
                 DPRINTLN("Error disabling channel");
-                SERIAL_COM.println("1\r\n");
-            } else {
-                DPRINTLN("Channel " + String(command.channel) + " disabled");
-                SERIAL_COM.println("0\r\n");
+                error = true;
             }
-            break;
-        case COMMAND_STEPS_INPUT:
+        } else if (command.type == STEPS_SYMBOL) {
             DPRINTLN("Setting steps: " + String(command.channel) + " to: " + String(command.arg));
             if (motorController.setSteps(command.channel, command.arg) != 0) {
                 DPRINTLN("Error setting steps");
-                SERIAL_COM.println("1\r\n");
-            } else {
-                DPRINTLN("Channel " + String(command.channel) + " set to steps " + String(command.arg));
-                SERIAL_COM.println("0\r\n");
+                error = true;
             }
-            break;
-        case COMMAND_TIME_INPUT:
-            DPRINTLN("Setting time: " + String(command.channel) + " to: " + String(command.arg));
+        } else if (command.type == TIME_SYMBOL) {
+            DPRINTLN("Setting time :" + String(command.channel) + " to: " + String(command.arg));
             if (motorController.setTime(command.channel, command.arg) != 0) {
                 DPRINTLN("Error setting time");
-                SERIAL_COM.println("1\r\n");
+                error = true;
+            }
+        } else if (command.type == START_SYMBOL) {
+            if (command.channel == -1) {
+                DPRINTLN("Moving all");
+                for (int i = 0; i < NUM_MOTORS; i++) {
+                    motorController.move(i);
+                }
             } else {
-                DPRINTLN("Channel " + String(command.channel) + " set to time " + String(command.arg));
-                SERIAL_COM.println("0\r\n");
-            }
-            break;
-        case COMMAND_START_MOTOR:
-            DPRINTLN("Moving: " + String(command.channel));
-            motorController.move(command.channel);
-            while (motorController.running()) yield();
-            SERIAL_COM.println("0\r\n");
-            break;
-        case COMMAND_START_ALL:
-            DPRINTLN("Moving all");
-            for (int i = 0; i < NUM_MOTORS; i++) {
-                motorController.move(i);
+                DPRINTLN("Moving: " + String(command.channel));
+                motorController.move(command.channel);
             }
             while (motorController.running()) yield();
-            SERIAL_COM.println("0\r\n");
-            break;
-        case COMMAND_STATUS:
+        } else if (command.type == STATUS_SYMBOL) {
             DPRINTLN("Status query");
             if (motorController.running()) {
-                SERIAL_COM.println("1\r\n");
-            } else {
-                SERIAL_COM.println("0\r\n");
+                error = true;
             }
-            break;
-        case COMMAND_RESTART:
+        } else if (command.type == RESTART_SYMBOL) {
             DPRINTLN("Restarting");
+            sendDoneSignal();
             ESP.restart();
-            break;
-        default:
-            DPRINTLN("Unknown command!");
-            break;
+        } else if (command.type == PIN_SYMBOL) {
+            DPRINTLN("Setting pin: " + String(command.channel) + " to: " + String(command.arg));
+            digitalWrite(command.channel, command.arg);
+        } else {
+            DPRINTLN("Unknown command received");
+        }
+        if (error) {
+            sendErrorSignal();
+        } else {
+            sendDoneSignal();
         }
     }
 }
 
 
 String readSerial() {
-    char chr;
     String buf = "";
-    do {
-        chr = SERIAL_COM.read();
-        buf += String(chr);
-    } while (SERIAL_COM.available() && chr != '\n');
+    while (SERIAL_COM.available() && !buf.endsWith("\r\n\r\n")) {
+        buf += String(char(SERIAL_COM.read()));
+    }
     return buf;
 }

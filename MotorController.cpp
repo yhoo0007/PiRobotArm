@@ -52,7 +52,7 @@ void MotorController::timerEnable() {
  */
 int MotorController::enable(int channel) {
     if (channel < 0 || channel >= numMotors || motors[channel].enaPin == PIN_UNDEFINED) {
-        DPRINTLN("MC: Invalid channel number provided");
+        DPRINTLN("MC: Invalid channel number provided " + String(motors[channel].enaPin));
         return 1;
     }
     return motors[channel].enable();

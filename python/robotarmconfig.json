@@ -1,0 +1,69 @@
+{
+    "motor_controllers": {
+        "controller0": {
+            "port": "COM4",
+            "baud": 115200,
+            "timeout": 5
+        },
+        "controller1": {
+            "port": "COM3",
+            "baud": 115200,
+            "timeout": 5
+        }
+    },
+    "motors": {
+        "base_motor": {
+            "motor_controller": "controller0",
+            "controller_channel": 0,
+            "min_angle": -45,
+            "max_angle": 225,
+            "init_angle": 90,
+            "microstep": 0.225,
+            "ratio": 7.143,
+            "max_time": 3000,
+            "min_time": 100
+        },
+        "arm_a_motor": {
+            "motor_controller": "controller0",
+            "controller_channel": 1,
+            "min_angle": 0,
+            "max_angle": 90,
+            "init_angle": 45,
+            "microstep": 0.225,
+            "ratio": 50,
+            "max_time": 3000,
+            "min_time": 100
+        },
+        "arm_b_motor": {
+            "motor_controller": "controller0",
+            "controller_channel": 2,
+            "min_angle": 20,
+            "max_angle": 180,
+            "init_angle": 90,
+            "microstep": 0.225,
+            "ratio": 50,
+            "max_time": 3000,
+            "min_time": 100
+        },
+        "picker_motor": {
+            "motor_controller": "controller1",
+            "controller_channel": 0,
+            "min_angle": 0,
+            "max_angle": 360,
+            "init_angle": 135,
+            "microstep": 0.225,
+            "ratio": 1,
+            "max_time": 3000,
+            "min_time": 10
+        }
+    },
+    "arms": {
+        "arm_a": {
+            "length": 320
+        },
+        "arm_b": {
+            "length": 270
+        }
+    },
+    "z_center_to_origin": 50
+}
