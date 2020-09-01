@@ -1,20 +1,9 @@
 from traceback import format_exc
 from python.robotarm import RobotArm
+# from python.command import Command
 
 
 CONFIG_PATH = './python/robotarmconfig.json'
-
-
-def getcommand():
-    '''
-    Receives input from the user and parses it into a command and arguments. All returned values
-    are casefolded.
-    :return: command and arguments as strings.
-    '''
-    raw = input('> ').casefold().split(' ')
-    if len(raw) >= 2:
-        return raw[0], raw[1:]
-    return raw[0], []
 
 
 if __name__ == '__main__':
@@ -26,32 +15,9 @@ if __name__ == '__main__':
 
         while True:
             print()
-            command, args = getcommand()
-            print(command, args)
-            if command == 'status':
-                print('Robot arm status:', robot_arm.getstatus())
-            elif command == 'restart':
-                print('Restarting robot arm')
-                print('Robot arm status:', robot_arm.restart())
-            elif command in ('x', 'y', 'z'):
-                if args:
-                    robot_arm.setcoord(command, int(args[0]))
-                else:
-                    print(getattr(robot_arm, command))
-            elif command in ('move', 'm'):
-                x, y, z = map(int, args)
-                robot_arm.moveto(x, y, z)  # blocking function
-            elif command in ('enable', 'e'):
-                robot_arm.enable(args[0])
-            elif command in ('disable', 'd'):
-                robot_arm.disable(args[0])
-            elif command in ('pin', 'p'):
-                robot_arm.setpin(args[0], args[1], args[2])
+            command = robot_arm.Command.getcommand()
+            print(command)
+            robot_arm.execute(command)
             
-            elif command in ('q', 'quit'):
-                robot_arm.terminate()
-                break
-            else:
-                print('Unknown command')
     except Exception as e:
         print(format_exc())

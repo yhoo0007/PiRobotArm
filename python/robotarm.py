@@ -17,6 +17,7 @@ class RobotArm:
         '''
         self.verbose = verbose
         self.loadconfig(config_path)
+        self.checkpoints = []
         if verbose:
             print('Robot arm initialization complete')
             pprint(self.__dict__)
@@ -261,11 +262,66 @@ class RobotArm:
                     self.picker_motor.calctime(picker_angle)
             ])
         time = round(time, 2)
-        # self.base_motor.moveto(base_angle, time)
-        # self.arm_a_motor.moveto(arm_a_angle, time)
-        print(self.arm_b_motor.moveto(arm_b_angle, time))
-        print(self.picker_motor.moveto(picker_angle, time))
-        print('Waiting')
+        base_motor_status = self.base_motor.moveto(base_angle, time)
+        arm_a_motor_status = self.arm_a_motor.moveto(arm_a_angle, time)
+        arm_b_motor_status = self.arm_b_motor.moveto(arm_b_angle, time)
+        picker_motor_status = self.picker_motor.moveto(picker_angle, time)
+        if self.verbose:
+            print(
+                'Queued movements with status code',
+                max([
+                    base_motor_status, 
+                    arm_a_motor_status, 
+                    arm_b_motor_status, 
+                    picker_motor_status
+                    ])
+                )
         for mc in self.motor_controllers.values():
-            print(mc.moveall())
-        print('Done')
+            mc.moveall()
+        for mc in self.motor_controllers.values():
+            mc.wait()
+        if self.verbose:
+            print('Done')
+
+    def execute(self, command):
+        if command.type == 'status':
+            print('Robot arm status:', self.getstatus())
+        elif command.type == 'restart':
+            print('Restarting robot arm')
+            print('Robot arm status:', self.restart())
+        elif command.type in ('x', 'y', 'z'):
+            if command.args:
+                self.setcoord(command.type, int(command.args[0]))
+            else:
+                print(getattr(self, command.type))
+        elif command.type in ('move', 'm'):
+            x, y, z = map(int, command.args)
+            self.moveto(x, y, z)  # blocking function
+        elif command.type in ('enable', 'e'):
+            self.enable(command.args[0])
+        elif command.type in ('disable', 'd'):
+            self.disable(command.args[0])
+        elif command.type in ('pin', 'p'):
+            self.setpin(command.args[0], command.args[1], command.args[2])
+        elif command.type in ('checkpoint', 'cp'):
+            pass
+        elif command.type in ('q', 'quit'):
+            self.terminate()
+            raise StopIteration
+        else:
+            print('Unknown command')
+
+    class Command:
+        def __init__(self, type, args):
+            self.type = type
+            self.args = args
+        
+        def __str__(self):
+            return f'{self.type} {self.args}'
+        
+        @staticmethod
+        def getcommand():
+            raw = input('> ').casefold().split(' ')
+            if len(raw) >= 2:
+                return RobotArm.Command(raw[0], raw[1:])
+            return RobotArm.Command(raw[0], [])
