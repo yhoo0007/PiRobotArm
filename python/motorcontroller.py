@@ -35,6 +35,22 @@ class MotorController:
         recv = self._readuntiltermination()
         # print(bytes, recv)
         return int(recv)
+    
+    def _send(self, bytes):
+        self._clearallbuffers()
+        self.serial_port.write(bytes)
+        self.serial_port.flush()
+    
+    def wait(self):
+        '''
+        Waits for a status code response from the motor controller.
+        :return: Status code from the motor controller.
+        '''
+        status = self._readuntiltermination()
+        try:
+            return int(status)
+        except ValueError:
+            return 1
 
     def getstatus(self):
         '''
@@ -96,17 +112,21 @@ class MotorController:
         to_send = f'P {pin} {state}\r\n\r\n'.encode()
         return self._sendreturn(to_send)
 
-    def moveall(self):
+    def moveall(self, wait=False):
         '''
-        Starts all movements on the motor controller.
+        Executes all movements on the motor controller.
         '''
         to_send = b'G\r\n\r\n'
-        return self._sendreturn(to_send)
+        if wait:
+            return self._return()
+        self._send(to_send)
     
-    def move(self, channel):
+    def move(self, channel, wait=False):
         '''
-        Starts the movement on a specific channel of the motor controller.
+        Executes movement on a specific channel of the motor controller.
         :param channel: Channel number
         '''
         to_send = f'G {channel}\r\n\r\n'.encode()
-        return self._sendreturn(to_send)
+        if wait:
+            return self._sendreturn(to_send)
+        self._send(to_send)
