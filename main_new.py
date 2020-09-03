@@ -1,6 +1,5 @@
 from traceback import format_exc
 from python.robotarm import RobotArm
-# from python.command import Command
 
 
 CONFIG_PATH = './python/robotarmconfig.json'
