@@ -1,5 +1,6 @@
 import json
 import math
+from time import sleep
 from pprint import pprint
 from serial import Serial
 from python.exception import InvalidConfigurationException, IKError
@@ -17,7 +18,8 @@ class RobotArm:
         '''
         self.verbose = verbose
         self.loadconfig(config_path)
-        self.checkpoints = []
+        self.checkpoints = dict()
+        self.prev_command = RobotArm.Command('move', [self.x, self.y, self.z])
         if verbose:
             print('Robot arm initialization complete')
             pprint(self.__dict__)
@@ -286,14 +288,17 @@ class RobotArm:
     def execute(self, command):
         if command.type == 'status':
             print('Robot arm status:', self.getstatus())
+            return
         elif command.type == 'restart':
             print('Restarting robot arm')
             print('Robot arm status:', self.restart())
+            return
         elif command.type in ('x', 'y', 'z'):
             if command.args:
                 self.setcoord(command.type, int(command.args[0]))
             else:
                 print(getattr(self, command.type))
+            return
         elif command.type in ('move', 'm'):
             x, y, z = map(int, command.args)
             self.moveto(x, y, z)  # blocking function
@@ -304,12 +309,33 @@ class RobotArm:
         elif command.type in ('pin', 'p'):
             self.setpin(command.args[0], command.args[1], command.args[2])
         elif command.type in ('checkpoint', 'cp'):
-            pass
+            if len(command.args) > 0:
+                if command.args[0] == 'rm':
+                    self.checkpoints.pop(int(command.args[1]))
+                elif command.args[0] == 'mv':
+                    self.checkpoints[int(command.args[2])] = self.checkpoints.pop(int(command.args[1]))
+                elif command.args[0] == 'play':
+                    print('Executing checkpoints:')
+                    for index, cp in sorted(self.checkpoints.items()):
+                        print(f'{index} {cp}')
+                        self.execute(cp)
+                else:
+                    cp_num = int(command.args[0])
+                    print(f'Setting checkpoint {cp_num} to prev command: {self.prev_command}')
+                    self.checkpoints[cp_num] = self.prev_command
+            else:
+                print('Checkpoints:')
+                for index, cp in self.checkpoints.items():
+                    print(index, cp)
+            return
+        elif command.type in ('wait', 'w'):
+            sleep(float(command.args[0]))
         elif command.type in ('q', 'quit'):
             self.terminate()
             raise StopIteration
         else:
             print('Unknown command')
+        self.prev_command = command
 
     class Command:
         def __init__(self, type, args):
